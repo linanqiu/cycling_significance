@@ -61,8 +61,8 @@ n_blocks <- length(x1) # assume equal
 
 statistic1 <- calc_speed(x1) - calc_speed(x2)
 statistic1
-# H0: mean(x1) - mean(x2) = 0
-# H1: mean(x1) - mean(x2) != 0
+# H0: speed(x1) - speed(x2) = 0
+# H1: speed(x1) - speed(x2) != 0
 permute <- function() {
   id <- sample(c(TRUE, FALSE), n_blocks, replace = TRUE)
   x1_0 <- if_else(id, x1, x2)
@@ -75,10 +75,14 @@ permute <- function() {
 
 statistic0s <- replicate(10000, permute())
 
+sum(statistic0s > statistic1 | statistic0s < -statistic1)
+q0 <- quantile(statistic0s, probs = c(0.05, 0.95))
+statistic1
+statistic1 - q0[2]
+statistic1 - q0[1]
+
 tibble(statistic0s) %>% 
   ggplot(mapping = aes(x = statistic0s)) +
-  geom_density() +
-  geom_vline(xintercept = statistic1)
-
-sum(statistic0s > statistic1 | statistic0s < -statistic1)
-
+  geom_histogram(binwidth = 0.01) +
+  geom_vline(xintercept = statistic1) +
+  geom_vline(xintercept = statistic1 - q0, linetype = 'dashed')
